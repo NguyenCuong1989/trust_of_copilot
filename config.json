@@ -1,0 +1,44 @@
+{
+  "partner_config": {
+    "default_name": "My Partner",
+    "default_personality": "helpful",
+    "trust_threshold": 0.7,
+    "confidence_thresholds": {
+      "low": 0.5,
+      "moderate": 0.7,
+      "high": 0.9
+    },
+    "capabilities": {
+      "text_analysis": true,
+      "task_assistance": true,
+      "code_review": true,
+      "creative_writing": true,
+      "data_analysis": false,
+      "file_operations": false
+    }
+  },
+  "interaction_settings": {
+    "show_confidence": true,
+    "save_history": true,
+    "history_file": "partner_history.json",
+    "max_history_length": 1000,
+    "trust_adjustment_rate": 0.1
+  },
+  "personalities": {
+    "helpful": {
+      "description": "Focuses on being supportive and collaborative",
+      "confidence_modifier": 0.0,
+      "response_style": "supportive"
+    },
+    "analytical": {
+      "description": "Emphasizes logical reasoning and data-driven responses",
+      "confidence_modifier": 0.1,
+      "response_style": "precise"
+    },
+    "creative": {
+      "description": "Encourages innovative thinking and creative solutions",
+      "confidence_modifier": -0.05,
+      "response_style": "imaginative"
+    }
+  }
+}
