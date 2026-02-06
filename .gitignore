@@ -29,3 +29,16 @@ game28.dta
 
 # Log files
 warnings.log
+
+# Python AI Partner files
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+*.so
+
+# AI Partner generated files
+*_history.json
+partner_history.json
+demo_history.json
