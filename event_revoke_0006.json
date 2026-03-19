@@ -1,0 +1,12 @@
+{
+  "event_id": "evt_apo_0006",
+  "type": "revocation",
+  "target": "policy_auth_gate.json",
+  "reason": "invalid_authority_injection",
+  "authority": "Ω",
+  "timestamp": "2026-03-19",
+  "payload": {
+    "action": "invalidate",
+    "note": "Policy created without valid authority"
+  }
+}
