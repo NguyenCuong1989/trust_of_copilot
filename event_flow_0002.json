@@ -1,0 +1,12 @@
+{
+  "event_id": "evt_apo_0002",
+  "type": "flow_extension",
+  "source_event": "857b4122c7cc73f44753016adaa543ff6c589776",
+  "timestamp": "2026-03-19",
+  "payload": {
+    "action": "extend_flow",
+    "input": "evt_apo_0001",
+    "output": "evt_apo_0002",
+    "relation": "alpha_to_alpha"
+  }
+}
