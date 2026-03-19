@@ -1,0 +1,11 @@
+{
+  "event_id": "evt_apo_0001",
+  "type": "bootstrap_flow",
+  "source": "asana",
+  "task_id": "1213730638317268",
+  "timestamp": "2026-03-19",
+  "payload": {
+    "goal": "Create first APO-NET flow",
+    "output": ["repo_node", "artifact", "canon_proof"]
+  }
+}
