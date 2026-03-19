@@ -1,0 +1,21 @@
+{
+  "policy_id": "auth_gate_v1",
+  "rules": [
+    {
+      "rule": "no_direct_commit_from_compute_nodes",
+      "description": "Compute/Orchestrator nodes (e.g. DAIOF) cannot commit directly to Canon",
+      "enforcement": "must pass through validation layer"
+    },
+    {
+      "rule": "event_must_be_signed",
+      "description": "All events must include origin + signature placeholder",
+      "enforcement": "reject_if_missing"
+    },
+    {
+      "rule": "canon_append_only",
+      "description": "No overwrite or deletion allowed",
+      "enforcement": "append_only"
+    }
+  ],
+  "timestamp": "2026-03-19"
+}
