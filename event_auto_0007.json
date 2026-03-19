@@ -1,0 +1,11 @@
+{
+  "event_id": "evt_apo_0007",
+  "type": "auto_continuation",
+  "source_event": "evt_apo_0006",
+  "timestamp": "2026-03-19",
+  "payload": {
+    "action": "continue_flow",
+    "mode": "auto",
+    "note": "system-driven continuation without Omega input"
+  }
+}
