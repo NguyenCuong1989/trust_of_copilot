@@ -1,0 +1,12 @@
+{
+  "event_id": "evt_apo_0005",
+  "type": "cross_node_event",
+  "source_node": "DAIOF-Framework",
+  "target_node": "trust_of_copilot",
+  "timestamp": "2026-03-19",
+  "payload": {
+    "action": "bridge_execution",
+    "description": "DAIOF generates event and commits into Canon Node",
+    "parent_event": "evt_apo_0004"
+  }
+}
