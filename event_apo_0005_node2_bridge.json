@@ -1,0 +1,13 @@
+{
+  "event_id": "evt_apo_0005",
+  "type": "node_spawn_bridge",
+  "parent_event": "evt_apo_0004",
+  "parent_proof": "d36285ef1b9949bd764cf9e8d905a8c90b66f6e5",
+  "timestamp": "2026-03-19",
+  "payload": {
+    "target_node": "node_2",
+    "strategy": "bridge_then_spawn",
+    "lineage": "preserved",
+    "action": "prepare_node_spawn"
+  }
+}
