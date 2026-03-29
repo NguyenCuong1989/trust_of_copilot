@@ -1,8 +1,16 @@
 name: Copilot
+
 on:
   workflow_dispatch:
+
 jobs:
   test:
     runs-on: ubuntu-latest
     steps:
-      - run: echo "OK"
+      - name: Check secrets
+        run: |
+          [ -n "${GH_PAT}" ] && echo "GH_PAT=SET" || echo "GH_PAT=MISSING"
+          [ -n "${NOTION_API_KEY}" ] && echo "NOTION_API_KEY=SET" || echo "NOTION_API_KEY=MISSING"
+        env:
+          GH_PAT: ${{ secrets.GH_PAT }}
+          NOTION_API_KEY: ${{ secrets.NOTION_API_KEY }}
