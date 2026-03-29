@@ -2,18 +2,17 @@ import { Client } from "@notionhq/client";
 
 const notion = new Client({ auth: process.env.NOTION_API_KEY });
 
-const owner = process.env.GITHUB_REPOSITORY.split("/")[0];
-const repo = process.env.GITHUB_REPOSITORY.split("/")[1];
+const [owner, repo] = process.env.GITHUB_REPOSITORY.split("/");
 const ghToken = process.env.GH_PAT;
-const databaseId = process.env.NOTION_DATABASE_ID;
+const dataSourceId = process.env.NOTION_DATABASE_ID;
 
 if (!ghToken) throw new Error("Missing GH_PAT");
 if (!process.env.NOTION_API_KEY) throw new Error("Missing NOTION_API_KEY");
-if (!databaseId) throw new Error("Missing NOTION_DATABASE_ID");
+if (!dataSourceId) throw new Error("Missing NOTION_DATABASE_ID");
 
 const headers = {
-  "Authorization": `Bearer ${ghToken}`,
-  "Accept": "application/vnd.github+json",
+  Authorization: `Bearer ${ghToken}`,
+  Accept: "application/vnd.github+json",
   "Content-Type": "application/json"
 };
 
@@ -34,12 +33,8 @@ function getTitle(page) {
 function getStatus(page) {
   const props = page.properties || {};
   for (const key of Object.keys(props)) {
-    if (props[key]?.type === "status") {
-      return props[key].status?.name || "";
-    }
-    if (props[key]?.type === "select" && /status/i.test(key)) {
-      return props[key].select?.name || "";
-    }
+    if (props[key]?.type === "status") return props[key].status?.name || "";
+    if (props[key]?.type === "select" && /status/i.test(key)) return props[key].select?.name || "";
   }
   return "";
 }
@@ -54,12 +49,12 @@ function getBody(page) {
       const text = richTextToString(value.rich_text);
       if (text) lines.push(`${key}: ${text}`);
     }
-    if (value?.type === "select" && value.select?.name) {
-      lines.push(`${key}: ${value.select.name}`);
+    if (value?.type === "title") {
+      const text = richTextToString(value.title);
+      if (text) lines.push(`${key}: ${text}`);
     }
-    if (value?.type === "status" && value.status?.name) {
-      lines.push(`${key}: ${value.status.name}`);
-    }
+    if (value?.type === "select" && value.select?.name) lines.push(`${key}: ${value.select.name}`);
+    if (value?.type === "status" && value.status?.name) lines.push(`${key}: ${value.status.name}`);
   }
   return lines.join("\n");
 }
@@ -70,10 +65,7 @@ async function gh(path, method = "GET", body) {
     headers,
     body: body ? JSON.stringify(body) : undefined
   });
-  if (!res.ok) {
-    const text = await res.text();
-    throw new Error(`${method} ${path} failed: ${res.status} ${text}`);
-  }
+  if (!res.ok) throw new Error(`${method} ${path} failed: ${res.status} ${await res.text()}`);
   if (res.status === 204) return null;
   return res.json();
 }
@@ -83,13 +75,14 @@ async function findExistingIssueByPageId(pageId) {
   return issues.find(issue => (issue.body || "").includes(`Notion Page ID: ${pageId}`));
 }
 
-const query = await notion.databases.query({
-  database_id: databaseId
+const query = await notion.dataSources.query({
+  data_source_id: dataSourceId
 });
 
 for (const page of query.results) {
   const title = getTitle(page);
   const status = getStatus(page).toLowerCase();
+
   if (!title) continue;
   if (status && ["done", "complete", "completed", "archived"].includes(status)) continue;
 
