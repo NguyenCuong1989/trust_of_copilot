@@ -26,7 +26,7 @@
     "rules": [
       { "match": "status:ready-for-pr", "action": "draft_pr" },
       { "match": "status:done", "action": "close_issue" },
-      { "match": "status": "completed", "action": "close_issue" },
+      { "match": "status:completed", "action": "close_issue" },
       { "match": "status:archived", "action": "close_issue" }
     ]
   }
