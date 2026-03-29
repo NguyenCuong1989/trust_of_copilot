@@ -60,7 +60,10 @@ function isClosedStatus(status = "") {
 
 function getBody(page) {
   const props = page.properties || {};
-  const lines = [`Notion Page ID: ${page.id}`, `Notion URL: ${page.url}`];
+  const lines = [
+    `Notion Page ID: ${page.id}`,
+    `Notion URL: ${page.url}`
+  ];
 
   for (const [key, value] of Object.entries(props)) {
     if (value?.type === "title") {
@@ -89,7 +92,10 @@ async function gh(path, method = "GET", body) {
     body: body ? JSON.stringify(body) : undefined
   });
 
-  if (!res.ok) throw new Error(`${method} ${path} failed: ${res.status} ${await res.text()}`);
+  if (!res.ok) {
+    throw new Error(`${method} ${path} failed: ${res.status} ${await res.text()}`);
+  }
+
   if (res.status === 204) return null;
   return res.json();
 }
@@ -112,10 +118,11 @@ async function syncPage(page) {
   const status = getStatus(page);
   const closed = isClosedStatus(status);
   const body = getBody(page);
-  const labels = ["notion-sync"];
-  if (status) labels.push(`status:${slugify(status)}`);
 
   if (!title) return;
+
+  const labels = ["notion-sync"];
+  if (status) labels.push(`status:${slugify(status)}`);
 
   for (const label of labels) {
     await ensureLabel(label);
@@ -143,23 +150,26 @@ async function syncPage(page) {
 
   const normalizedExisting = `${existing.title}\n${existing.body || ""}`.trim();
   const normalizedNext = `[Notion] ${title}\n${body}`.trim();
+  const existingLabels = (existing.labels || []).map(x => x.name).sort().join(",");
+  const nextLabels = labels.slice().sort().join(",");
+  const desiredState = closed ? "closed" : "open";
 
   const patch = {};
+
   if (normalizedExisting !== normalizedNext) {
     patch.title = `[Notion] ${title}`;
     patch.body = body;
   }
 
-  if ((existing.labels || []).map(x => x.name).sort().join(",") !== labels.slice().sort().join(",")) {
+  if (existingLabels !== nextLabels) {
     patch.labels = labels;
   }
 
-  const desiredState = closed ? "closed" : "open";
   if (existing.state !== desiredState) {
     patch.state = desiredState;
   }
 
-  if (Object.keys(patch).length) {
+  if (Object.keys(patch).length > 0) {
     await gh(`/repos/${owner}/${repo}/issues/${existing.number}`, "PATCH", patch);
     console.log(`UPDATED_ISSUE #${existing.number} ${title} -> state=${desiredState} labels=${labels.join(",")}`);
   } else {
@@ -168,15 +178,16 @@ async function syncPage(page) {
 }
 
 let cursor = undefined;
+
 do {
-  const query = await notion.dataSources.query({
+  const result = await notion.dataSources.query({
     data_source_id: dataSourceId,
     start_cursor: cursor
   });
 
-  for (const page of query.results) {
+  for (const page of result.results) {
     await syncPage(page);
   }
 
-  cursor = query.has_more ? query.next_cursor : undefined;
+  cursor = result.has_more ? result.next_cursor : undefined;
 } while (cursor);
