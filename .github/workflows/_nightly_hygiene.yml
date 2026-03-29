@@ -1,0 +1,51 @@
+name: _Nightly Hygiene
+
+on:
+  workflow_call:
+
+permissions:
+  contents: read
+  issues: write
+  pull-requests: write
+
+jobs:
+  hygiene:
+    runs-on: ubuntu-latest
+    env:
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      GITHUB_REPOSITORY: ${{ github.repository }}
+      FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Audit MCP mesh state
+        run: |
+          node - <<'JS'
+          const [owner, repo] = process.env.GITHUB_REPOSITORY.split("/");
+          const token = process.env.GITHUB_TOKEN;
+          async function gh(path, method="GET", body) {
+            const res = await fetch(`https://api.github.com${path}`, {
+              method,
+              headers: {
+                Authorization: `Bearer ${token}`,
+                Accept: "application/vnd.github+json",
+                "Content-Type": "application/json"
+              },
+              body: body ? JSON.stringify(body) : undefined
+            });
+            if (!res.ok) throw new Error(`${method} ${path} failed: ${res.status} ${await res.text()}`);
+            if (res.status === 204) return null;
+            return res.json();
+          }
+          const issues = await gh(`/repos/${owner}/${repo}/issues?state=all&per_page=100`);
+          let notionSync = 0, ready = 0, closed = 0;
+          for (const issue of issues) {
+            const labels = (issue.labels || []).map(l => l.name);
+            if (labels.includes("notion-sync")) notionSync++;
+            if (labels.includes("status:ready-for-pr")) ready++;
+            if (issue.state === "closed") closed++;
+          }
+          console.log(`AUDIT notion_sync=${notionSync} ready_for_pr=${ready} closed=${closed}`);
+          JS

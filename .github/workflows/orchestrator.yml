@@ -1,0 +1,37 @@
+name: MCP Mesh Orchestrator
+
+on:
+  workflow_dispatch:
+    inputs:
+      target_identity:
+        description: "primary | secondary | all"
+        required: false
+        default: "all"
+  schedule:
+    - cron: '*/30 * * * *'
+
+permissions:
+  contents: write
+  issues: write
+  pull-requests: write
+
+jobs:
+  notion_sync:
+    uses: ./.github/workflows/_notion_sync.yml
+    secrets: inherit
+
+  owner_routing:
+    needs: notion_sync
+    uses: ./.github/workflows/_owner_routing.yml
+    secrets: inherit
+
+  pr_draft:
+    needs: owner_routing
+    uses: ./.github/workflows/_pr_draft.yml
+    secrets: inherit
+
+  hygiene:
+    if: github.event_name == 'schedule'
+    needs: pr_draft
+    uses: ./.github/workflows/_nightly_hygiene.yml
+    secrets: inherit

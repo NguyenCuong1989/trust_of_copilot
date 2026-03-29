@@ -1,0 +1,33 @@
+{
+  "mesh_version": "2026-03-30",
+  "identities": {
+    "primary": {
+      "email": "nguyencuong.2509@gmail.com",
+      "role": "owner",
+      "priority": 1
+    },
+    "secondary": {
+      "email": "nguyencuong.2509@icloud.com",
+      "role": "ops-fallback",
+      "priority": 2
+    }
+  },
+  "connectors": {
+    "notion": { "kind": "mcp", "role": "source_of_truth", "enabled": true },
+    "github": { "kind": "mcp", "role": "execution_plane", "enabled": true },
+    "zapier": { "kind": "router", "role": "trigger_router", "enabled": false },
+    "poke": { "kind": "middleware", "role": "bridge", "enabled": false },
+    "dropbox": { "kind": "context_store", "role": "identity_artifacts", "enabled": false },
+    "slack": { "kind": "org_context", "role": "artifact_feed", "enabled": false }
+  },
+  "routing": {
+    "default_owner_email": "nguyencuong.2509@gmail.com",
+    "fallback_owner_email": "nguyencuong.2509@icloud.com",
+    "rules": [
+      { "match": "status:ready-for-pr", "action": "draft_pr" },
+      { "match": "status:done", "action": "close_issue" },
+      { "match": "status": "completed", "action": "close_issue" },
+      { "match": "status:archived", "action": "close_issue" }
+    ]
+  }
+}
