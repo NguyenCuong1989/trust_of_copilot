@@ -1,0 +1,19 @@
+name: MCP Mesh Receiver
+
+on:
+  repository_dispatch:
+    types: [mcp_propagation]
+
+permissions:
+  contents: read
+
+jobs:
+  receive:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Receive propagation
+        run: |
+          echo "RECEIVED_MCP_PROPAGATION"
+          echo "source_repo=${{ github.event.client_payload.source_repo }}"
+          echo "source_workflow=${{ github.event.client_payload.source_workflow }}"
+          echo "timestamp=${{ github.event.client_payload.timestamp }}"

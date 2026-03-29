@@ -30,6 +30,11 @@ jobs:
     uses: ./.github/workflows/_pr_draft.yml
     secrets: inherit
 
+  mesh_propagation:
+    needs: pr_draft
+    uses: ./.github/workflows/_mesh_propagation.yml
+    secrets: inherit
+
   hygiene:
     if: github.event_name == 'schedule'
     needs: pr_draft

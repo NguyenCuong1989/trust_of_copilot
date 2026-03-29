@@ -1,0 +1,32 @@
+name: _Mesh Propagation
+
+on:
+  workflow_call:
+
+permissions:
+  contents: read
+  actions: write
+
+jobs:
+  propagate:
+    runs-on: ubuntu-latest
+    env:
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      GITHUB_REPOSITORY: ${{ github.repository }}
+    steps:
+      - name: Repository dispatch to mesh receiver
+        run: |
+          curl -sS -X POST "https://api.github.com/repos/${GITHUB_REPOSITORY}/dispatches" \
+            -H "Authorization: Bearer ${GITHUB_TOKEN}" \
+            -H "Accept: application/vnd.github+json" \
+            -H "Content-Type: application/json" \
+            -d @- <<JSON
+          {
+            "event_type": "mcp_propagation",
+            "client_payload": {
+              "source_repo": "${GITHUB_REPOSITORY}",
+              "source_workflow": "orchestrator",
+              "timestamp": "$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+            }
+          }
+JSON
