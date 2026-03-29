@@ -1,6 +1,9 @@
 import { Client } from "@notionhq/client";
 
-const notion = new Client({ auth: process.env.NOTION_API_KEY });
+const notion = new Client({
+  auth: process.env.NOTION_API_KEY,
+  notionVersion: "2026-03-11"
+});
 
 const [owner, repo] = process.env.GITHUB_REPOSITORY.split("/");
 const ghToken = process.env.GH_PAT;
@@ -23,9 +26,7 @@ function richTextToString(arr = []) {
 function getTitle(page) {
   const props = page.properties || {};
   for (const key of Object.keys(props)) {
-    if (props[key]?.type === "title") {
-      return richTextToString(props[key].title);
-    }
+    if (props[key]?.type === "title") return richTextToString(props[key].title);
   }
   return "";
 }
@@ -41,21 +42,21 @@ function getStatus(page) {
 
 function getBody(page) {
   const props = page.properties || {};
-  const lines = [];
-  lines.push(`Notion Page ID: ${page.id}`);
-  lines.push(`Notion URL: ${page.url}`);
+  const lines = [`Notion Page ID: ${page.id}`, `Notion URL: ${page.url}`];
+
   for (const [key, value] of Object.entries(props)) {
-    if (value?.type === "rich_text") {
-      const text = richTextToString(value.rich_text);
-      if (text) lines.push(`${key}: ${text}`);
-    }
     if (value?.type === "title") {
       const text = richTextToString(value.title);
+      if (text) lines.push(`${key}: ${text}`);
+    }
+    if (value?.type === "rich_text") {
+      const text = richTextToString(value.rich_text);
       if (text) lines.push(`${key}: ${text}`);
     }
     if (value?.type === "select" && value.select?.name) lines.push(`${key}: ${value.select.name}`);
     if (value?.type === "status" && value.status?.name) lines.push(`${key}: ${value.status.name}`);
   }
+
   return lines.join("\n");
 }
 
@@ -65,6 +66,7 @@ async function gh(path, method = "GET", body) {
     headers,
     body: body ? JSON.stringify(body) : undefined
   });
+
   if (!res.ok) throw new Error(`${method} ${path} failed: ${res.status} ${await res.text()}`);
   if (res.status === 204) return null;
   return res.json();
@@ -98,6 +100,7 @@ for (const page of query.results) {
   } else {
     const normalizedExisting = `${existing.title}\n${existing.body || ""}`.trim();
     const normalizedNext = `[Notion] ${title}\n${body}`.trim();
+
     if (normalizedExisting !== normalizedNext) {
       await gh(`/repos/${owner}/${repo}/issues/${existing.number}`, "PATCH", {
         title: `[Notion] ${title}`,
