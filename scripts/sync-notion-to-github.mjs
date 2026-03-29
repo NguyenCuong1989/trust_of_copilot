@@ -5,15 +5,18 @@ const notion = new Client({
   notionVersion: "2026-03-11"
 });
 
-const [owner, repo] = process.env.GITHUB_REPOSITORY.split("/");
+const repoFull = process.env.GITHUB_REPOSITORY;
 const ghToken = process.env.GITHUB_TOKEN;
 const dataSourceId = process.env.NOTION_DATABASE_ID;
 
+if (!repoFull) throw new Error("Missing GITHUB_REPOSITORY");
 if (!ghToken) throw new Error("Missing GITHUB_TOKEN");
 if (!process.env.NOTION_API_KEY) throw new Error("Missing NOTION_API_KEY");
 if (!dataSourceId) throw new Error("Missing NOTION_DATABASE_ID");
 
-const headers = {
+const [owner, repo] = repoFull.split("/");
+
+const ghHeaders = {
   Authorization: `Bearer ${ghToken}`,
   Accept: "application/vnd.github+json",
   "Content-Type": "application/json"
@@ -40,6 +43,21 @@ function getStatus(page) {
   return "";
 }
 
+function slugify(s = "") {
+  return s
+    .toLowerCase()
+    .normalize("NFKD")
+    .replace(/[^\w\s-]/g, "")
+    .trim()
+    .replace(/\s+/g, "-")
+    .replace(/-+/g, "-");
+}
+
+function isClosedStatus(status = "") {
+  const s = status.toLowerCase();
+  return ["done", "complete", "completed", "archived", "closed"].includes(s);
+}
+
 function getBody(page) {
   const props = page.properties || {};
   const lines = [`Notion Page ID: ${page.id}`, `Notion URL: ${page.url}`];
@@ -53,8 +71,12 @@ function getBody(page) {
       const text = richTextToString(value.rich_text);
       if (text) lines.push(`${key}: ${text}`);
     }
-    if (value?.type === "select" && value.select?.name) lines.push(`${key}: ${value.select.name}`);
-    if (value?.type === "status" && value.status?.name) lines.push(`${key}: ${value.status.name}`);
+    if (value?.type === "select" && value.select?.name) {
+      lines.push(`${key}: ${value.select.name}`);
+    }
+    if (value?.type === "status" && value.status?.name) {
+      lines.push(`${key}: ${value.status.name}`);
+    }
   }
 
   return lines.join("\n");
@@ -63,7 +85,7 @@ function getBody(page) {
 async function gh(path, method = "GET", body) {
   const res = await fetch(`https://api.github.com${path}`, {
     method,
-    headers,
+    headers: ghHeaders,
     body: body ? JSON.stringify(body) : undefined
   });
 
@@ -77,38 +99,84 @@ async function findExistingIssueByPageId(pageId) {
   return issues.find(issue => (issue.body || "").includes(`Notion Page ID: ${pageId}`));
 }
 
-const query = await notion.dataSources.query({
-  data_source_id: dataSourceId
-});
+async function ensureLabel(name) {
+  try {
+    await gh(`/repos/${owner}/${repo}/labels/${encodeURIComponent(name)}`);
+  } catch {
+    await gh(`/repos/${owner}/${repo}/labels`, "POST", { name });
+  }
+}
 
-for (const page of query.results) {
+async function syncPage(page) {
   const title = getTitle(page);
-  const status = getStatus(page).toLowerCase();
-
-  if (!title) continue;
-  if (status && ["done", "complete", "completed", "archived"].includes(status)) continue;
-
+  const status = getStatus(page);
+  const closed = isClosedStatus(status);
   const body = getBody(page);
+  const labels = ["notion-sync"];
+  if (status) labels.push(`status:${slugify(status)}`);
+
+  if (!title) return;
+
+  for (const label of labels) {
+    await ensureLabel(label);
+  }
+
   const existing = await findExistingIssueByPageId(page.id);
 
   if (!existing) {
     const created = await gh(`/repos/${owner}/${repo}/issues`, "POST", {
       title: `[Notion] ${title}`,
-      body
+      body,
+      labels
     });
-    console.log(`CREATED_ISSUE #${created.number} ${title}`);
-  } else {
-    const normalizedExisting = `${existing.title}\n${existing.body || ""}`.trim();
-    const normalizedNext = `[Notion] ${title}\n${body}`.trim();
 
-    if (normalizedExisting !== normalizedNext) {
-      await gh(`/repos/${owner}/${repo}/issues/${existing.number}`, "PATCH", {
-        title: `[Notion] ${title}`,
-        body
+    if (closed) {
+      await gh(`/repos/${owner}/${repo}/issues/${created.number}`, "PATCH", {
+        state: "closed"
       });
-      console.log(`UPDATED_ISSUE #${existing.number} ${title}`);
+      console.log(`CREATED_AND_CLOSED #${created.number} ${title}`);
     } else {
-      console.log(`NO_CHANGE #${existing.number} ${title}`);
+      console.log(`CREATED_ISSUE #${created.number} ${title}`);
     }
+    return;
+  }
+
+  const normalizedExisting = `${existing.title}\n${existing.body || ""}`.trim();
+  const normalizedNext = `[Notion] ${title}\n${body}`.trim();
+
+  const patch = {};
+  if (normalizedExisting !== normalizedNext) {
+    patch.title = `[Notion] ${title}`;
+    patch.body = body;
+  }
+
+  if ((existing.labels || []).map(x => x.name).sort().join(",") !== labels.slice().sort().join(",")) {
+    patch.labels = labels;
+  }
+
+  const desiredState = closed ? "closed" : "open";
+  if (existing.state !== desiredState) {
+    patch.state = desiredState;
+  }
+
+  if (Object.keys(patch).length) {
+    await gh(`/repos/${owner}/${repo}/issues/${existing.number}`, "PATCH", patch);
+    console.log(`UPDATED_ISSUE #${existing.number} ${title} -> state=${desiredState} labels=${labels.join(",")}`);
+  } else {
+    console.log(`NO_CHANGE #${existing.number} ${title}`);
   }
 }
+
+let cursor = undefined;
+do {
+  const query = await notion.dataSources.query({
+    data_source_id: dataSourceId,
+    start_cursor: cursor
+  });
+
+  for (const page of query.results) {
+    await syncPage(page);
+  }
+
+  cursor = query.has_more ? query.next_cursor : undefined;
+} while (cursor);

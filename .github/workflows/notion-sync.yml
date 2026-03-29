@@ -18,6 +18,7 @@ jobs:
       GITHUB_REPOSITORY: ${{ github.repository }}
       NOTION_API_KEY: ${{ secrets.NOTION_API_KEY }}
       NOTION_DATABASE_ID: ${{ secrets.NOTION_DATABASE_ID }}
+      FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
