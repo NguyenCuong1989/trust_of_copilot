@@ -1,0 +1,8 @@
+{
+  "name": "trust-of-copilot-sync",
+  "private": true,
+  "type": "module",
+  "dependencies": {
+    "@notionhq/client": "^3.1.0"
+  }
+}
