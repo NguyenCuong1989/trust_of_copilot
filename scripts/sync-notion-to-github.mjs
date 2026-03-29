@@ -6,10 +6,10 @@ const notion = new Client({
 });
 
 const [owner, repo] = process.env.GITHUB_REPOSITORY.split("/");
-const ghToken = process.env.GH_PAT;
+const ghToken = process.env.GITHUB_TOKEN;
 const dataSourceId = process.env.NOTION_DATABASE_ID;
 
-if (!ghToken) throw new Error("Missing GH_PAT");
+if (!ghToken) throw new Error("Missing GITHUB_TOKEN");
 if (!process.env.NOTION_API_KEY) throw new Error("Missing NOTION_API_KEY");
 if (!dataSourceId) throw new Error("Missing NOTION_DATABASE_ID");
 
