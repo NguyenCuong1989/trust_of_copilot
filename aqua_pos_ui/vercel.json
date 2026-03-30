@@ -1,0 +1,10 @@
+{
+  "framework": "nextjs",
+  "cleanUrls": true,
+  "trailingSlash": false,
+  "functions": {
+    "app/api/**": {
+      "maxDuration": 30
+    }
+  }
+}
