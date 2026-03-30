@@ -12,6 +12,7 @@ export const AQUA_DATABASES = {
 } as const;
 
 export type AquaDatabaseKey = keyof typeof AQUA_DATABASES;
+export type LogLevel = 'INFO' | 'OK' | 'WARN' | 'ERROR';
 
 type NotionPropertyValue = Record<string, unknown>;
 
@@ -136,4 +137,21 @@ export function normalizeQuantity(value: unknown) {
     throw new Error('Quantity must be a number');
   }
   return parsed;
+}
+
+export async function logSystemEvent(input: {
+  entry: string;
+  message: string;
+  module?: string;
+  status?: LogLevel;
+  relatedEntity?: string;
+}) {
+  const status = input.status ?? 'OK';
+  return createPageInDatabase('systemLogs', {
+    'Log Entry': titleProp(input.entry),
+    Status: selectProp(status === 'OK' ? '🟢 OK' : status === 'INFO' ? '🔵 Info' : status === 'WARN' ? '⚠️ Warning' : '🔴 Critical'),
+    Message: textProp(input.message),
+    Module: selectProp(input.module ?? 'APΩ AI-OS'),
+    Related_Entity: textProp(input.relatedEntity ?? '')
+  });
 }

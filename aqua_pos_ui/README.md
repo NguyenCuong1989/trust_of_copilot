@@ -2,14 +2,19 @@
 
 Next.js App Router prototype for the AQUA_POS system.
 
+## Signal-first protocol
+- SYSTEM_LOGS is the first write path for every mutation.
+- All registry/database updates are derived after an event is recorded.
+- If a log cannot be written, the state change does not proceed.
+
 ## What is included
 - Dashboard overview for revenue and low stock signals
 - Fish CRUD workspace
 - POS register screen for orders and order_items
 - Inventory / tank health view
 - Notion integration for 10 databases through API routes
-- Sales endpoint that creates orders, order items, and updates fish stock
-- Inventory adjustment endpoint for death loss and health changes
+- Sales endpoint that logs first, then creates orders, order items, and updates fish stock
+- Inventory adjustment endpoint that logs first, then applies stock and health changes
 - Vercel deployment config
 
 ## Notion databases
@@ -31,29 +36,6 @@ Configure these environment variables:
 - PATCH/DELETE /api/notion/[database]
 - POST /api/sales
 - POST /api/adjustments
-
-## Sales payload example
-{
-  "customerName": "Walk-in",
-  "paymentMethod": "cash",
-  "items": [
-    {
-      "fishPageId": "notion-page-id",
-      "quantity": 2,
-      "unitPrice": 350000,
-      "fishName": "Koi Platinum"
-    }
-  ]
-}
-
-## Inventory adjustment payload example
-{
-  "fishPageId": "notion-page-id",
-  "quantityLoss": 1,
-  "healthDelta": -8,
-  "reason": "death",
-  "note": "Dead on arrival"
-}
 
 ## Notes
 The prototype expects common Notion property names such as Name, Stock, Health, Status, Quantity, Unit_Price, Line_Total, and Relation fields. If your live databases use different names, update the mappings in lib/aqua-pos.ts.
