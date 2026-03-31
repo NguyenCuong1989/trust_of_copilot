@@ -2,7 +2,15 @@
   "name": "trust-of-copilot-sync",
   "private": true,
   "type": "module",
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start"
+  },
   "dependencies": {
-    "@notionhq/client": "^5.15.0"
+    "@notionhq/client": "^5.15.0",
+    "next": "^14.2.30",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1"
   }
 }
