@@ -4,7 +4,7 @@ on:
   workflow_call:
 
 permissions:
-  contents: read
+  contents: write
   actions: write
 
 jobs:
@@ -16,7 +16,7 @@ jobs:
     steps:
       - name: Repository dispatch to mesh receiver
         run: |
-          curl -sS -X POST "https://api.github.com/repos/${GITHUB_REPOSITORY}/dispatches" \
+          curl --fail-with-body -sS -X POST "https://api.github.com/repos/${GITHUB_REPOSITORY}/dispatches" \
             -H "Authorization: Bearer ${GITHUB_TOKEN}" \
             -H "Accept: application/vnd.github+json" \
             -H "Content-Type: application/json" \
