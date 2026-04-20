@@ -1,0 +1,27 @@
+{
+  "event_id": "evt_runtime_env_identity_synced",
+  "title": "RUNTIME_ENV_IDENTITY_SYNCED",
+  "type": "system_log",
+  "timestamp": "2026-04-20T11:05:00+07:00",
+  "repo": "NguyenCuong1989/trust_of_copilot",
+  "pageIds": {
+    "system_logs": "f23587342b044dfcbd3e345e674a1f00",
+    "ap_net": "ff2205e6281c4701bbd019fae3bfea91",
+    "imperial_manifest": "348a223993aa81eea054ca4614035e30"
+  },
+  "log": "RUNTIME_ENV_IDENTITY_SYNCED",
+  "hardware_nodes": [
+    {
+      "node_id": "msi_titan_gt77",
+      "display_name": "MSI Titan GT77",
+      "platform": "windows",
+      "execution_role": "primary_execution"
+    },
+    {
+      "node_id": "macbook_m2",
+      "display_name": "MacBook M2",
+      "platform": "unix",
+      "execution_role": "secondary_unix"
+    }
+  ]
+}
