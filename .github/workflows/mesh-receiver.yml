@@ -10,9 +10,15 @@ permissions:
 jobs:
   receive:
     runs-on: ubuntu-latest
+    env:
+      EXPECTED_SOURCE_REPO: NguyenCuong1989/trust_of_copilot
     steps:
       - name: Receive propagation
         run: |
+          if [ "${{ github.event.client_payload.source_repo }}" != "$EXPECTED_SOURCE_REPO" ]; then
+            echo "Unexpected source_repo=${{ github.event.client_payload.source_repo }}"
+            exit 1
+          fi
           echo "RECEIVED_MCP_PROPAGATION"
           echo "source_repo=${{ github.event.client_payload.source_repo }}"
           echo "source_workflow=${{ github.event.client_payload.source_workflow }}"
