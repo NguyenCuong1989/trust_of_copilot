@@ -1,15 +1,33 @@
 {
-  "mesh_version": "2026-03-30",
+  "mesh_version": "2026-04-20",
   "identities": {
     "primary": {
       "email": "nguyencuong.2509@gmail.com",
       "role": "owner",
-      "priority": 1
+      "priority": 1,
+      "hardware_node_id": "msi_titan_gt77"
     },
     "secondary": {
       "email": "nguyencuong.2509@icloud.com",
       "role": "ops-fallback",
-      "priority": 2
+      "priority": 2,
+      "hardware_node_id": "macbook_m2"
+    }
+  },
+  "hardware_nodes": {
+    "msi_titan_gt77": {
+      "display_name": "MSI Titan GT77",
+      "platform": "windows",
+      "execution_role": "primary_execution",
+      "priority": 1,
+      "execution_label": "Titan"
+    },
+    "macbook_m2": {
+      "display_name": "MacBook M2",
+      "platform": "unix",
+      "execution_role": "secondary_unix",
+      "priority": 2,
+      "execution_label": "MacBook"
     }
   },
   "connectors": {
@@ -23,6 +41,8 @@
   "routing": {
     "default_owner_email": "nguyencuong.2509@gmail.com",
     "fallback_owner_email": "nguyencuong.2509@icloud.com",
+    "runtime_node_order": ["msi_titan_gt77", "macbook_m2"],
+    "runtime_node_fallbacks": ["macbook_m2", "msi_titan_gt77"],
     "rules": [
       { "match": "status:ready-for-pr", "action": "draft_pr" },
       { "match": "status:done", "action": "close_issue" },
