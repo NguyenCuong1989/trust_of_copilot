@@ -4,7 +4,7 @@ on:
   workflow_call:
 
 permissions:
-  contents: write
+  contents: read
   actions: write
 
 jobs:
@@ -12,11 +12,11 @@ jobs:
     runs-on: ubuntu-latest
     env:
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      GITHUB_REPOSITORY: ${{ github.repository }}
+      MESH_REPOSITORY: NguyenCuong1989/trust_of_copilot
     steps:
       - name: Repository dispatch to mesh receiver
         run: |
-          curl --fail-with-body -sS -X POST "https://api.github.com/repos/${GITHUB_REPOSITORY}/dispatches" \
+          curl -sS -X POST "https://api.github.com/repos/${MESH_REPOSITORY}/dispatches" \
             -H "Authorization: Bearer ${GITHUB_TOKEN}" \
             -H "Accept: application/vnd.github+json" \
             -H "Content-Type: application/json" \
@@ -24,9 +24,9 @@ jobs:
           {
             "event_type": "mcp_propagation",
             "client_payload": {
-              "source_repo": "${GITHUB_REPOSITORY}",
+              "source_repo": "NguyenCuong1989/trust_of_copilot",
               "source_workflow": "orchestrator",
               "timestamp": "$(date -u +%Y-%m-%dT%H:%M:%SZ)"
             }
           }
-JSON
+          JSON
