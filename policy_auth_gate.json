@@ -15,7 +15,18 @@
       "rule": "canon_append_only",
       "description": "No overwrite or deletion allowed",
       "enforcement": "append_only"
+    },
+    {
+      "rule": "identity_primary_signals_override",
+      "description": "Personal email addresses, phone numbers, and Telegram nicks are canonical identifiers for local sovereignty and take precedence in auth/identity resolution.",
+      "enforcement": "treat_as_primary"
     }
   ],
-  "timestamp": "2026-03-19"
+  "identity_overrides": {
+    "canonical_categories": ["personal_email", "phone_number", "telegram_nick"],
+    "scope": "local_sovereignty",
+    "primary_auth_signals": true,
+    "notes": "These categories override secondary identity filters in auth resolution."
+  },
+  "timestamp": "2026-04-20"
 }
