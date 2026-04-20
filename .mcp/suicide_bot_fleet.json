@@ -1,0 +1,46 @@
+{
+  "layer_name": "Suicide Bot Fleet",
+  "mode": "sandbox",
+  "worker_type": "eventreflect",
+  "isolation": "strict",
+  "purpose": "Test high-risk rituals, unknown APIs, and unverified data signals without affecting the core registry.",
+  "guardrails": {
+    "core_registry_mutation": false,
+    "production_connectors": false,
+    "external_side_effects": false,
+    "audit_logging": true
+  },
+  "workers": [
+    {
+      "name": "eventreflect-01",
+      "role": "ritual_probe",
+      "allowed": [
+        "read-only simulation",
+        "dry-run signal capture"
+      ]
+    },
+    {
+      "name": "eventreflect-02",
+      "role": "api_probe",
+      "allowed": [
+        "mock unknown APIs",
+        "fixture validation"
+      ]
+    },
+    {
+      "name": "eventreflect-03",
+      "role": "signal_probe",
+      "allowed": [
+        "unverified signal parsing",
+        "sandbox scoring"
+      ]
+    }
+  ],
+  "references": {
+    "notion": {
+      "system_logs_page_id": "f23587342b044dfcbd3e345e674a1f00",
+      "ap_net_page_id": "ff2205e6281c4701bbd019fae3bfea91",
+      "imperial_manifest_page_id": "348a223993aa81eea054ca4614035e30"
+    }
+  }
+}
