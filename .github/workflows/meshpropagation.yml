@@ -1,6 +1,18 @@
 name: MCP Mesh Propagation
 
 on:
+  push:
+    branches:
+      - main
+    paths:
+      - telegram_readback_adapter.py
+      - telegram_connector_app.py
+      - server.js
+      - browser-agent-smoke.mjs
+      - WorkspaceShell.tsx
+      - .github/workflows/meshpropagation.yml
+      - .github/workflows/_mesh_propagation.yml
+  workflow_dispatch:
   workflow_call:
 
 permissions:
@@ -16,13 +28,17 @@ jobs:
     steps:
       - name: Repository dispatch to mesh receiver
         run: |
-          curl --fail-with-body -sS -X POST "https://api.github.com/repos/${GITHUB_REPOSITORY}/dispatches"             -H "Authorization: Bearer ${GITHUB_TOKEN}"             -H "Accept: application/vnd.github+json"             -H "Content-Type: application/json"             -d @- <<JSON
+          curl --fail-with-body -sS -X POST "https://api.github.com/repos/${GITHUB_REPOSITORY}/dispatches" \
+            -H "Authorization: Bearer ${GITHUB_TOKEN}" \
+            -H "Accept: application/vnd.github+json" \
+            -H "Content-Type: application/json" \
+            -d @- <<JSON
           {
             "event_type": "mcp_propagation",
             "client_payload": {
               "source_repo": "${GITHUB_REPOSITORY}",
-              "source_workflow": "orchestrator",
+              "source_workflow": "meshpropagation",
               "timestamp": "$(date -u +%Y-%m-%dT%H:%M:%SZ)"
             }
           }
-JSON
+          JSON
