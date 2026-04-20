@@ -6,7 +6,7 @@ from typing import Any
 
 GEMINI_PROJECT_ID = "gen-lang-client-0863690953"
 CLOUD_VISION_LANE = "gemini"
-SOvereign_DISPATCH_CHANNEL = "telegram"
+SOVEREIGN_DISPATCH_CHANNEL = "telegram"
 
 
 @dataclass(slots=True)
@@ -32,7 +32,7 @@ def build_gemini_payload(frame: ReadbackFrame) -> dict[str, Any]:
     return {
         "project_id": GEMINI_PROJECT_ID,
         "lane": CLOUD_VISION_LANE,
-        "dispatch_channel": SOvereign_DISPATCH_CHANNEL,
+        "dispatch_channel": SOVEREIGN_DISPATCH_CHANNEL,
         "chat_id": frame.chat_id,
         "message_id": frame.message_id,
         "prompt": frame.prompt,
