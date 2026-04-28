@@ -3,6 +3,7 @@
   "private": true,
   "type": "module",
   "dependencies": {
-    "@notionhq/client": "^5.15.0"
+    "@notionhq/client": "^5.15.0",
+    "@vercel/analytics": "^2.0.1"
   }
 }
