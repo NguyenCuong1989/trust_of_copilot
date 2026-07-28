@@ -19,8 +19,7 @@ def record_eventreflect(status: str, details: dict | None = None) -> None:
         "details": details or {},
     }
     with EVENTREFLECT_LOG.open("a", encoding="utf-8") as handle:
-        handle.write(json.dumps(entry, ensure_ascii=False) + "
-")
+        handle.write(json.dumps(entry, ensure_ascii=False) + "\n")
 
 
 def eventreflect_loop(poll_seconds: int = 60) -> None:
